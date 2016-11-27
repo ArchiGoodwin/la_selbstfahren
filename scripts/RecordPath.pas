@@ -4,8 +4,13 @@ interface
 
 uses SysUtils, Classes, Moving;
 
+const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
+
+// Weatherwax	
+const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
+
 // GythaOgg	
-const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingGythaOgg_StartLoc_1';
+// const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingGythaOgg_StartLoc_1';
 
 // Functions declaration
 function SaveWayPointsFile(strFileName: string; wayPoints: PRecordPointArray): integer;
@@ -45,8 +50,9 @@ var
    recordPointFirst, recordPointSecond: TRecordPoint;
    spotId, index, secondsOnPoint : Integer;
    pointType : TPointType;
+   
 begin
-	FileName := 'Scripts/deaglee_/scripts/HuntingGythaOgg_StartLoc_1';
+	FileName := m_HuntingZonePath;
 	New(PointLast);
 	New(PointNew);
 	PointLast.X := 0;
@@ -127,6 +133,7 @@ end;
 
 begin
 	Print('RecordPath script started.');
+	RndDelay(1000);
 	
 	// Algorithm is next
 	// 1. Load character in start point - tp point og current Grounds
