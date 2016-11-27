@@ -1,0 +1,7 @@
+uses AntiDeBuff;
+
+begin
+  Script.NewThread(@PathFinder.RecordPath);
+  Gps.LoadBase('.\path.db3');
+  //Pathfinder.GpsMoveTo( 115422, -178190, -928 );
+end.

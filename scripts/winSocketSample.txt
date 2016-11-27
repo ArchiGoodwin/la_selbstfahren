@@ -1,0 +1,33 @@
+ Работа с интернетом
+Код:
+uses Classes, TCP;
+var
+  Head: TStringList;
+  Socket: TTCPBlockSocket;
+  i: integer;
+
+procedure OnFree;
+begin
+  Head.Free;
+  Socket.Free;
+end;
+  
+begin
+  Head := TStringList.Create;
+  Head.Add('GET / HTTP/1.1');            //Создаем запрос, который пошлем серверу
+  Head.Add('Accept: */*');
+  Head.Add('Accept-Encoding: gzip, deflate');
+  Head.Add('Host: http://www.google.ru');
+  Head.Add('Connection: Keep-Alive');
+  Head.Add(#10#13);
+
+  Socket := TTCPBlockSocket.Create;      //Создаем сокет
+  Socket.connect('173.194.71.94', '80'); //конектим к google
+  if Socket.LastError <> 0 then exit;    //Если произошла ошибка, выходим
+  Socket.SendString(Head.text);          //Отправляем наши данные
+
+  Head.Clear;
+  Head.DelimitedText := Socket.RecvString(5000); //Получаем ответ
+  for i := 0 to Head.Count-1 do          //Показываем ответ 
+    print(Head.Strings[i]);
+end.

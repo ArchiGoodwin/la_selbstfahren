@@ -1,0 +1,92 @@
+WinAPI пример
+WinAPI - пример использования.
+В данном примере, используются 4 системных функции которые находятся системных DLL Windows.
+
+1. MessageBox >> см.описание у microsoft
+2. ShellExecute >> см.описание у microsoft
+3. FindWindow >> см.описание у microsoft
+4. SetWindowText >> см.описание у microsoft
+
+Скрипт выводит диалог, после нажатия "ОК" запускает Калькулятор, ищет его окно и меняет текст.
+
+Код:
+function MessageBoxW(hWnd: integer; Text, Caption: PChar; uType: integer): integer; stdcall; external 'user32.dll';
+function ShellExecuteW(hwnd: integer; lpOperation, lpFile, lpParameters, lpDirectory: PChar;  nShowCmd: integer): integer; stdcall; external 'Shell32.dll';
+function FindWindowW(lpClassName, lpWindowName: PChar): integer; stdcall; external 'user32.dll';
+function SetWindowTextW(hWnd: integer; lpString: PChar): boolean; stdcall; external 'user32.dll';
+
+var H: integer;
+begin  
+  MessageBoxW(0, 'HELLO !', 'Пример WinAPI', 0);
+  ShellExecuteW(0, 'open', 'calc', nil, nil, 0);
+  Delay(500); // даем время запуститься калькулятору
+  H := FindWindowW(nil,'Калькулятор');
+  SetWindowTextW(H, 'Shadow - WinAPI DEMO');  
+end.
+
+
+Потоки:
+Код:
+function TerminateThread(hThread: THandle; dwExitCode: integer): Boolean; stdcall;external 'kernel32';
+function CloseHandle(hObject: THandle):boolean; stdcall;external 'kernel32';
+function SuspendThread(hThread: THandle):boolean; stdcall;external 'kernel32';
+function ResumeThread(hThread: THandle):boolean; stdcall;external 'kernel32';
+procedure Schet;
+var 
+  i:integer;
+begin
+  while true do 
+  begin
+    Delay(1000);
+    Print(i);
+    inc(i);
+  end;
+  EndThread(0);
+end;
+
+var
+  th:THandle;
+  TID: cardinal;
+
+procedure onfree;
+begin
+  TerminateThread(th,0);
+  CloseHandle(th);
+end; 
+begin
+  th:=beginthread(nil, 0, @Schet, nil, 0, TID);
+  delay(10000);
+end.
+
+
+
+==========================
+
+
+WinAPI функции по работой с мышью (клики):
+Код:
+function SetCursorPos(x, y : integer): boolean; stdcall; external 'user32.dll';
+function mouse_event(dwFlags, dx, dy, dwData: byte; dwExtraInfo: integer): void; stdcall; external 'user32.dll';
+
+//winapi
+procedure mouseClick(point: array of integer; _delay : integer = mouseEventDelay); //base mouse delay
+begin
+  SetCursorPos(point[0], point[1]);
+  mouse_event($2, 0, 0, 0, 0);
+  delay(_delay);
+  mouse_event($4, 0, 0, 0, 0);
+end;
+
+procedure moveFromTo(start: array of integer; finish: array of integer); //если isCustomCheckTime, в таком случае выставляем кастомную задержку(возможность просмотра лса);
+begin
+   SetCursorPos(start[0], start[1]);
+   delay(perActionDelay);
+   mouse_event($2, 0, 0, 0, 0);
+   delay(perActionDelay);   
+   SetCursorPos(finish[0], finish[1]);
+   delay(perActionDelay);
+   mouse_event($4, 0, 0, 0, 0);
+   delay(perActionDelay);   
+end;
+
+

@@ -1,0 +1,157 @@
+1_=================================================================================
+Анти дизарм
+Код:
+const
+  WeaponID:=4233;//ID Itema оружия
+var
+  item: TL2Item;
+
+begin
+while delay(500) do //Два раза в секунду
+  if inventory.user.byid(WeaponID, item) and not (Item.Equipped) then begin
+    Delay(500);
+    Engine.UseItem(WeaponID);
+    Delay(800);
+  end;
+end.
+
+2_======================================
+Диспел бафов
+Код:
+procedure buffDispel(buffID: integer);
+var
+   Buff: TL2Buff;
+   randomDelay: integer;
+begin
+  Buff := nil;
+   if User.Buffs.ByID(buffID, Buff) and Assigned(Buff) and (Buff.ID = buffID) then
+   begin
+      randomDelay := minDelay + Random(maxDelay - minDelay);
+      delay(randomDelay);
+      //print('Dispel ID: ' + IntToStr(buffID) + ' skill id: ' + IntToStr(Buff.ID) + ' skill name: ' + Buff.Name);
+      Engine.Dispel(buffID);
+   end;
+end;
+procedure dispelController(effArr: IntArr);
+var 
+   i: integer;
+begin
+   print('[Thread] Dispel thread started');
+   while Engine.Status = lsOnline do
+   begin
+      for i:=0 to Length(effArr)-1 do
+      begin
+         buffDispel(effArr[i]);
+         delay(200);
+      end;
+        
+   delay(500);      
+   end;
+end;
+//запускать автоматический диспел
+var
+  effectsArray: IntArr;
+begin
+script.newThread(@dispelController(effectsArray));
+end.
+
+3_======================================
+Отбиваемся и выходим из игры в указанное время
+Отбиваемся и выходим из игры в указанное время
+
+Код:
+uses SysUtils, Classes;
+
+const
+  offtime = '04:57'; //указываем время отключения
+
+//Сравниваем текущее время с offtime
+function TT: boolean;
+var
+  Date : TDateTime;
+begin
+  Date := time;
+  if (FormatDateTime('hh:nn', now) >= offtime) then
+  begin
+    Print('time to relax '+FormatDateTime('hh:nn', date));
+    Result:= True;
+  end else Result:= False;
+end;
+
+//Проверка на агров
+function Fight: boolean;
+var
+  i: integer;
+begin
+  for i:=0 to NpcList.count-1 do
+  begin
+   if (NpcList.Items(i).Target = User)
+    and not NpcList.Items(i).Dead then
+    begin
+    Print('agr true');
+    Result:= true;
+    end else Result:= false;
+  end;
+end;
+
+//Отбиваемся
+procedure Combat;
+var
+  i: integer;
+begin
+  while Fight do begin
+    delay(100);
+    for i:= 0 to NpcList.count-1 do
+      begin
+        if (NpcList.Items(i).Target = User) and not NpcList.Items(i).Dead then
+        begin
+        Engine.SetTarget(NpcList.Items(i));
+    
+          while not User.Target.Dead do begin
+            //Тут пишем код, как будем отбиваться от мобов, юзать банки и т.д.
+          end;
+      
+        end;
+    end;
+    
+  end;
+end;
+
+//Потоковый цикл проверки ТТ + выполнение требуемого действия
+procedure TTOff;
+begin
+  while true do begin
+  delay(500);
+    if TT then begin
+    Engine.FaceControl(1, false); //выключаем интерфейс
+    Combat; //отбиваемся
+    Engine.Restart;
+    Delay(5000);
+    Engine.GameClose;
+    Script.Stop;
+    end;
+  end;
+end;
+
+
+
+begin
+Script.NewThread(@TTOff);
+Delay(-1);
+end.
+
+
+4_======================
+function PvpOrPk():boolean;
+var i: integer;
+begin
+Result:=false;
+  for i:=0 to CharList.Count-1 do
+  begin
+  if ((CharList.Items(i).Inzone) and (not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and (CharList.Items(i).target = user)) then
+   if CharList.Items(i).Pvp or CharList.Items(i).PK then begin 
+     print('Вот он-> '+CharList.Items(i).name+' пытается нас грохнуть! Валим!');
+   Result:=true;
+   end;
+   end;
+end;
