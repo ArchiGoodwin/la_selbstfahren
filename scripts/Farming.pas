@@ -9,17 +9,19 @@ var
 	m_equippedWeaponID: integer = -1;
 
 // TODO: create a special logic, which will detect the Character name and load appropriate custom config file with next params: 
+const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/"
+
 // deagleee	
 // const m_userConfig: string = 'deaglee';
 // const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingZonePath001';	
 	
 // Hwel	
 // const m_userConfig: string = 'Hwel';
-// const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingHwel_Mithryl_15';	
+// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
 
 // GythaOgg	
 const m_userConfig: string = 'GythaOgg';
-const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingGythaOgg_StartLoc_1';	
+const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_1';	
 const m_maxSecondsOnspot: integer = 15;
 const m_defaultSpotRange: integer = 1000;
 	
