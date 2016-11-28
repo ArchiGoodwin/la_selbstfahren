@@ -9,7 +9,7 @@ var
 	m_equippedWeaponID: integer = -1;
 
 // TODO: create a special logic, which will detect the Character name and load appropriate custom config file with next params: 
-const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/"
+const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
 
 // deagleee	
 // const m_userConfig: string = 'deaglee';
@@ -19,10 +19,16 @@ const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/"
 // const m_userConfig: string = 'Hwel';
 // const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
 
+// Weatherwax	
+const m_userConfig: string = 'Weatherwax';
+const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
+
 // GythaOgg	
-const m_userConfig: string = 'GythaOgg';
-const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_1';	
-const m_maxSecondsOnspot: integer = 15;
+// const m_userConfig: string = 'GythaOgg';
+// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_1';
+
+	
+const m_maxSecondsOnspot: integer = 25;
 const m_defaultSpotRange: integer = 1000;
 	
 // Init function. Can be replaced with True Class constructor
@@ -324,44 +330,6 @@ begin
 	Result := 0;
 	bNeedToGoToNextSpot := false;
 	spotRange := m_defaultSpotRange;
-		
-	{
-	while ((index < high(pWayPoints^)) and (NOT isPointFound)) do
-	begin
-		isPointFound := (pWayPoints^[index].spotId = p_spotId) AND (pWayPoints^[index].PointType = START_WAY);
-		if (isPointFound) then
-		begin
-			startWayPoint := pWayPoints^[index];
-			indexStartWayPoint := index;
-			Print('StartWayPoint Index: ' + IntToStr(index));
-		end;
-		Inc(index);
-	end;
-	
-	// Check that user is on the start point of Way to next spot
-	if (User.InRange(startWayPoint.X, startWayPoint.Y, startWayPoint.Z, 600)) then 
-	begin		
-		Print('User is on the start WAY point of spot');
-
-		index := MoveToStartPointOfSpot(pWayPoints, indexStartWayPoint, p_spotId);
-		
-		if (index > -1) then
-		begin
-			startSpotPoint := pWayPoints^[index]
-		end
-		else begin
-			Print('Start SPOT point has not been found.');
-			Result := -2;
-			Exit();
-		end;	
-	end else
-	begin
-		Print('User is OUT of start way point of spot.');
-		Result := -2;
-		Exit();
-
-	end;
-	}
 	
 	// Define startSpotPoint
 	if ((p_StarSpotIndex > -1) and (p_StarSpotIndex < high(pWayPoints^))) then
@@ -378,7 +346,6 @@ begin
 	// TODO: may be add max seconds on spot into path file?
 	// TODO: may be add spot range into path file?
 
-	
 	// Check that the user is on the start point of spot
 	if (User.InRange(startSpotPoint.X, startSpotPoint.Y, startSpotPoint.Z, spotRange) and not bNeedToGoToNextSpot) then
 	begin

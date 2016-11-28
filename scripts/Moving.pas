@@ -126,13 +126,14 @@ var
 begin
 	Print('FindNearestWayPoint() spotId: ' + IntToStr(p_spotId));
 	Result := -1;
+	indexPoint := -1;
 	
 	if (p_spotId = -1) then // find any way point 
 	begin
 		minDistance := user.distto(pWayPoints^[0].X, pWayPoints^[0].Y, pWayPoints^[0].Z);
 		curDistance := 0;
-		i := 0;
 		indexPoint := 0;
+		i := 0;
 		isPointFound := false;
 		while (i < high(pWayPoints^)) do
 		begin
@@ -144,34 +145,46 @@ begin
 			end;
 			Inc(i);
 		end;
+		
+		if (minDistance > p_searchRange) then
+			indexPoint := -1;
 	end else
 	begin // find the way point for specific Spot Id
 		minDistance := -1; // not defined yet
 		curDistance := 0;
 		i := 0;
-		indexPoint := 0;
 		isPointFound := false;
-		while ((i < high(pWayPoints^)) and (pWayPoints^[i].SpotId = p_spotId)) do
+		while (i < high(pWayPoints^)) do
 		begin
-			if (minDistance = -1) then
+			if (pWayPoints^[i].SpotId = p_spotId) then 
 			begin
-				minDistance := user.distto(pWayPoints^[i].X, pWayPoints^[i].Y, pWayPoints^[i].Z);
-				indexPoint := i;
-			end 
-			else begin 
-				curDistance := user.distto(pWayPoints^[i].X, pWayPoints^[i].Y, pWayPoints^[i].Z);
-				if (curDistance < minDistance) then
+				if (minDistance = -1) then
 				begin
-					minDistance := curDistance;
+					minDistance := user.distto(pWayPoints^[i].X, pWayPoints^[i].Y, pWayPoints^[i].Z);
 					indexPoint := i;
+				end 
+				else begin 
+					curDistance := user.distto(pWayPoints^[i].X, pWayPoints^[i].Y, pWayPoints^[i].Z);
+					if (curDistance < minDistance) then
+					begin
+						minDistance := curDistance;
+						indexPoint := i;
+					end;
 				end;
 			end;
+		
 			Inc(i);
 		end;
+		
+		if (minDistance > p_searchRange) then
+			indexPoint := -1;
 	end;
 	
-	Print('FindNearestWayPoint(): spotID:' + IntToStr(pWayPoints^[indexPoint].spotID) + '; PointType: ' + IntToStr(Ord(pWayPoints^[indexPoint].PointType)));
-	Result := indexPoint;
+	if (indexPoint > -1) then
+	begin
+		Print('FindNearestWayPoint(): spotID:' + IntToStr(pWayPoints^[indexPoint].spotID) + '; PointType: ' + IntToStr(Ord(pWayPoints^[indexPoint].PointType)));
+		Result := indexPoint;
+	end;
 end;
 
 function Bypass(dlg: string): boolean;
