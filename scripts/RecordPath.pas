@@ -4,17 +4,9 @@ interface
 
 uses SysUtils, Classes, Moving;
 
-const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
-
-// Weatherwax	
-const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
-
-// GythaOgg	
-// const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingGythaOgg_StartLoc_1';
-
 // Functions declaration
 function SaveWayPointsFile(strFileName: string; wayPoints: PRecordPointArray): integer;
-function RecordWayPoints(p: pointer): integer;
+function RecordWayPoints(): integer;
 
 implementation
 
@@ -42,7 +34,7 @@ begin
 	Print('Points count: ' + IntToStr(i));
 end;
 
-function RecordWayPoints(p: pointer): integer;
+function RecordWayPoints(): integer;
 var
    wayPoints : TRecordPointArray;
    FileName : string;
@@ -139,7 +131,7 @@ begin
 	// 1. Load character in start point - tp point og current Grounds
 	// 2. Need to record N start points of ways to N start points of farm spots
 	// 3. After that it should be possible to load from file all data about waypoints
-	Script.NewThread(@RecordWayPoints);
+	RecordWayPoints();
 end.
 
 

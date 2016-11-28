@@ -9,27 +9,11 @@ var
 	m_equippedWeaponID: integer = -1;
 
 // TODO: create a special logic, which will detect the Character name and load appropriate custom config file with next params: 
-const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
-
-// deagleee	
-// const m_userConfig: string = 'deaglee';
-// const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingZonePath001';	
-	
-// Hwel	
-// const m_userConfig: string = 'Hwel';
-// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
-
-// Weatherwax	
-const m_userConfig: string = 'Weatherwax';
-const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
-
-// GythaOgg	
-// const m_userConfig: string = 'GythaOgg';
-// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_1';
-
-	
 const m_maxSecondsOnspot: integer = 25;
 const m_defaultSpotRange: integer = 1000;
+const m_maxCountOfFailedSpots: integer = 3; // count of failed spots in a row
+const m_maxLoopsOnHuntingZone: integer = 2;
+const m_maxSecondsNotInCombat: integer = 6;
 	
 // Init function. Can be replaced with True Class constructor
 function InitializeLocalVariables(): integer;	
@@ -37,7 +21,7 @@ function InitializeLocalVariables(): integer;
 // Print message
 function AddMsgToLog(p_strMsg: string): integer;
 // Move to the point with a bit rnd range on X and Y coordinates
-function Neurotic_Clicks_Thread(d: integer): integer;
+function NeuroticClicksThread(): integer;
 
 // TODO: add function to check captcha
 // TODO: add any other functions to check GMs
@@ -46,7 +30,9 @@ function Neurotic_Clicks_Thread(d: integer): integer;
 //function CheckCharDeBuffed(): boolean;
 function IsOtherPlayerOnSpot(p_Range: integer): boolean;
 // Check agro players:
-function CheckPvpOrPk(p_Range: integer): boolean;
+function IsPvpOrPkAround(p_Range: integer): boolean;
+// Check that char is not in combat and make rnd step
+function IsNotInCombatTooLong(var p_seconds: integer): boolean;
 // Go to town if dead
 function GoHomeIfDead(): integer;
 // Check if character is locked in coordinates
@@ -79,7 +65,7 @@ begin
 		// TODO: load some special variables for current character
 		// TODO: m_equippedWeaponID :=
 		m_isDead := (User.HP = 0);
-		//Gps.LoadBase(exepath+'\qpath.db3');  // Либо название своей базы
+		//Gps.LoadBase(exepath+'\qpath.db3');  
 	end;
 end;
 
@@ -89,20 +75,30 @@ begin
   Print(p_strMsg);
 end;
 
-function Neurotic_Clicks_Thread(d: integer): integer;     // поток, имитирующий нервное кликальнье мышкой по земле рядом с персонажем
+function NeuroticClicksThread(): integer;
+var
+	count: integer;
 begin
-  Result := 0;
-  
-  while RndDelay(450) do 
-  begin                                                         // запускаем бесконечный цикл
+	Result := 0;
+
+	count := 0;
+	while (Delay(5000) and (count < 10)) do 
+	begin                                                         
 		if (Engine.Status = lsOnline) then 
-		begin                                        // если мы в игре, то
-		  if (not User.Moved) and (not User.InCombat) and (User.Cast.EndTime = 0)       // если мы не движемся, не в бою, ничего не кастуем
-		  and ((User.Target = nil) or (User.Target.Dead)) then                          // и у нас нет таргета или цель мертва, то
-			if Engine.DMoveTo(User.X+random(2*d)-d, User.Y+random(2*d)-d, User.Z) then  // делаем рандомный шаг в сторону
-			  Delay(1445+random(12500));                                                  // и ждем рандомное кол-во времени
+		begin                                        
+			if (not User.Moved) and (not User.InCombat) and (User.Cast.EndTime = 0) and ((User.Target = nil) or (User.Target.Dead)) then
+			begin
+				if (RndMoveTo(User.X, User.Y, User.Z)) then
+				begin
+					RndDelay(1000 + random(2000));
+					Inc(count);
+				end;
+			end else
+			begin
+				count := 0; // char is moving
+			end;
 		end;
-  end;
+	end;
 end;
 
 function CheckCharIsDisarmed(): boolean;
@@ -140,8 +136,9 @@ begin
 			RndDelay(300000);
 			if (ChekPoint[0] = user.x) and (ChekPoint[1] = user.y) and (ChekPoint[2] = user.z) then 
 			begin
+				Print('Character hasnt been moving during 30 seconds!');
 				// Character is locked
-				engine.gameclose;
+				// engine.gameclose;
 			end;
 		end;
 	end;
@@ -168,19 +165,19 @@ begin
 	end;
 end;
 
-function CheckPvpOrPk(p_Range: integer): boolean;
+function IsPvpOrPkAround(p_Range: integer): boolean;
 var i: integer;
 begin
-Result:=false;
-  for i:=0 to CharList.Count-1 do
-  begin
-  if ((CharList.Items(i).Inzone) and (not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and (CharList.Items(i).target = user)) then
-   if CharList.Items(i).Pvp or CharList.Items(i).PK then 
-	   begin 
-		 print('Вот он-> '+CharList.Items(i).name+' пытается нас грохнуть! Валим!');
-	   Result:=true;
-	   end;
-   end;
+	Result:=false;
+	for i:=0 to CharList.Count-1 do
+		begin
+		if ((CharList.Items(i).Inzone) and (not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and (CharList.Items(i).target = user)) then
+			if CharList.Items(i).Pvp or CharList.Items(i).PK then 
+			begin 
+			print('This character: '+CharList.Items(i).name+' is trying to kill me!');
+			Result:=true;
+			end;
+	end;
 end;
 
 function IsOtherPlayerOnSpot(p_Range: integer): boolean;
@@ -198,10 +195,27 @@ begin
 	end;
 end;
 
+function IsNotInCombatTooLong(var p_seconds: integer): boolean;
+begin
+	// Check if user is not in combat during last 8 seconds
+	if ((NOT User.Moved) AND (User.Cast.EndTime = 0) AND ((User.Target = nil) or (User.Target.Dead))) then
+	begin	
+		Inc(p_seconds);
+		if (p_seconds mod 2 = 0) then //rnd step each 3 seconds
+		begin
+			RndDelay(50);
+			RndMoveTo(User.X, User.Y, User.Z);
+			Print('IsNotInCombatTooLong: seconds ' + IntToStr(p_seconds));
+		end
+	end else
+		p_seconds := 0;
+	
+	Result := p_seconds > m_maxSecondsNotInCombat;
+end;
 
 function FarmMobsInHuntingZone(): integer;
 var
-	spotId, countSpot, index, countFailedSpots: integer;
+	spotId, countSpot, index, countFailedSpots, countZoneLoops: integer;
 	bCanToGoToNextSpot: boolean;
 	fileNameWayPoints: string;
 	wayPoints : TRecordPointArray;
@@ -212,6 +226,7 @@ begin
 	RndDelay(500);
 	bCanToGoToNextSpot := true;
 	countFailedSpots := 0;
+	countZoneLoops := 0;
 	
 	// Load wayPoints from file for hunting zone
 	// File should be created independently in RecordPath unit for any of hunting zone.
@@ -223,7 +238,7 @@ begin
 		Print('No wayPoints loaded from file.');
 		Exit();
 	end; 
-	Print('Count of loaded spots: ' + IntToStr(countSpot));
+	Print('FarmMobsInHuntingZone: Count of loaded spots: ' + IntToStr(countSpot));
 	
 	spotId := wayPoints[0].SpotId;
 	Engine.LoadConfig(m_userConfig);    
@@ -255,34 +270,46 @@ begin
 				index := MoveToStartPointOfSpot(@wayPoints, index, spotId);
 				if (index = -1) then
 				begin
-					Print('Was failed to achieve nearest START SPOT point.');
+					Print('FarmMobsInHuntingZone: Was failed to achieve nearest START SPOT point.');
 					Exit();
 				end else
 				begin
 					// 4. Farm On current START SPOT point.
 					if (FarmOnSpot(@wayPoints, spotId, m_maxSecondsOnspot, index) < 0) then
 					begin
-						Print('Something wrong with last spot. Cannot continue to farm on this spot.');
+						Print('FarmMobsInHuntingZone: Something wrong with last spot. Cannot continue to farm on this spot.');
 						// Add here a counter of failed spots in current hunting zone. Can use it to halt.
 						Inc(countFailedSpots);
-						if (countFailedSpots > 2) then 
+						if (countFailedSpots > m_maxCountOfFailedSpots) then 
 							bCanToGoToNextSpot := false;
 					end
 					else begin
-						Print('Farming on last spot was completed.');
+						Print('FarmMobsInHuntingZone: Farming on last spot was completed.');
 					end;
 					
 					Inc(spotId);
+				
+					// Ended up with all spots in hunting zone
+					if (bCanToGoToNextSpot AND (spotId >= countSpot)) then
+					begin
+						// Check if loops are allowed on hunting zone - reset zone spot Id
+						Inc(countZoneLoops);
+						if (countZoneLoops < m_maxLoopsOnHuntingZone) then
+						begin
+							spotId := wayPoints[0].SpotId;
+							Print('FarmMobsInHuntingZone: completed ' + IntToStr(countZoneLoops) + ' loop of ' + IntToStr(m_maxLoopsOnHuntingZone));
+						end;
+					end;
 				end
 			end;
 		end else
 		begin
-			Print('No any way point has been found near user.');
+			Print('FarmMobsInHuntingZone: No any way point has been found near user.');
 			bCanToGoToNextSpot := false;
 		end;
 	end;
 	
-	Print('Farm in current hunting zone is COMPLETED.');
+	Print('FarmMobsInHuntingZone: Farm in current hunting zone is COMPLETED.');
 end;
 
 function MoveToStartPointOfSpot(pWayPoints: PRecordPointArray; p_wayPointId: integer; p_spotId: integer): integer;
@@ -296,7 +323,7 @@ begin
 	isPointFound := false;
 	index := p_wayPointId;
 	
-	while ((index < high(pWayPoints^)) and (NOT isPointFound)) do
+	while ((index <= high(pWayPoints^)) and (NOT isPointFound)) do
 	begin
 		// Debug 
 		Print('Index:' + IntToStr(index) + '; PointType: ' + IntToStr(Ord(pWayPoints^[index].PointType)));
@@ -320,8 +347,8 @@ end;
 
 function FarmOnSpot(pWayPoints: PRecordPointArray; p_spotId: integer; p_MaxSecondsOnSpot: integer; p_StarSpotIndex: integer): integer;
 var
-	secondsOnSpot: integer;
-	bNeedToGoToNextSpot, bIsOtherPlayerDetected: boolean;
+	secondsOnSpot, secondsNotInCombat: integer;
+	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat: boolean;
 	spotRange : integer;
 	startSpotPoint: TRecordPoint;
 begin
@@ -332,7 +359,7 @@ begin
 	spotRange := m_defaultSpotRange;
 	
 	// Define startSpotPoint
-	if ((p_StarSpotIndex > -1) and (p_StarSpotIndex < high(pWayPoints^))) then
+	if ((p_StarSpotIndex > -1) and (p_StarSpotIndex <= high(pWayPoints^))) then
 	begin
 		if (pWayPoints^[p_StarSpotIndex].spotId = p_spotId) AND (pWayPoints^[p_StarSpotIndex].PointType = START_SPOT) then
 			startSpotPoint := pWayPoints^[p_StarSpotIndex]
@@ -352,6 +379,7 @@ begin
 		// On the start point of Spot
 		bNeedToGoToNextSpot := false;
 		secondsOnSpot := 0;
+		secondsNotInCombat := 0;
 		Print('User is on START SPOT. Start farming...');		
 		Engine.Facecontrol(0, True);
 		
@@ -369,15 +397,19 @@ begin
 				break;
 			end;
 			}
+			// Check if user is not in combat during last 8 seconds
+			bIsNotInCombatTooLong := IsNotInCombatTooLong(secondsNotInCombat);
 			
 			// Check other players/GMs on spot.
-			bIsOtherPlayerDetected := IsOtherPlayerOnSpot(spotRange);
+			bIsOtherPlayerDetected := IsOtherPlayerOnSpot(spotRange) or IsPvpOrPkAround(spotRange);
 			if (bIsOtherPlayerDetected) then
 				Result := -2;
+				
+			bIsInCombat := (not User.Cast.EndTime = 0) or not ((User.Target = nil) or (User.Target.Dead));	
 			
 			// Update spot conditions:
 			Inc(secondsOnSpot);
-			bNeedToGoToNextSpot := (secondsOnSpot > p_MaxSecondsOnSpot) or bIsOtherPlayerDetected;
+			bNeedToGoToNextSpot := not bIsInCombat and ((secondsOnSpot > p_MaxSecondsOnSpot) or bIsOtherPlayerDetected or bIsNotInCombatTooLong);
 			//Print('seconds on spot: ' + String(secondsOnSpot));
 		end;	
 
@@ -423,7 +455,7 @@ begin
 		// Check if user in the hunting zone then start farming
 		// Init successfully, start boting process
 		// List of checks in threads
-		// Script.NewThread(@Neurotic_Clicks_Thread(40));    
+		// Script.NewThread(@NeuroticClicksThread());    
 		// Script.NewThread(@CheckCharIsLocked()); 
 		// Script.NewThread(@CheckCharIsDebuffed()); 	
 		FarmMobsInHuntingZone();
