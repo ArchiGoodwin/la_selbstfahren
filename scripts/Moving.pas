@@ -16,12 +16,12 @@ const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
 // const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingZonePath001';	
 	
 // Hwel	
-// const m_userConfig: string = 'Hwel';
-// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
+const m_userConfig: string = 'Hwel';
+const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
 
 // Weatherwax	
-const m_userConfig: string = 'Weatherwax';
-const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
+// const m_userConfig: string = 'Weatherwax';
+// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
 
 // GythaOgg	
 // const m_userConfig: string = 'GythaOgg';

@@ -13,15 +13,13 @@ const m_maxSecondsOnspot: integer = 25;
 const m_defaultSpotRange: integer = 1000;
 const m_maxCountOfFailedSpots: integer = 3; // count of failed spots in a row
 const m_maxLoopsOnHuntingZone: integer = 2;
-const m_maxSecondsNotInCombat: integer = 6;
+const m_maxSecondsNotInCombat: integer = 4;
 	
 // Init function. Can be replaced with True Class constructor
 function InitializeLocalVariables(): integer;	
 // TODO: fix it - it doesn't write log anywhere. Also make sense to write special function to send IM in ICQ
 // Print message
 function AddMsgToLog(p_strMsg: string): integer;
-// Move to the point with a bit rnd range on X and Y coordinates
-function NeuroticClicksThread(): integer;
 
 // TODO: add function to check captcha
 // TODO: add any other functions to check GMs
@@ -33,6 +31,8 @@ function IsOtherPlayerOnSpot(p_Range: integer): boolean;
 function IsPvpOrPkAround(p_Range: integer): boolean;
 // Check that char is not in combat and make rnd step
 function IsNotInCombatTooLong(var p_seconds: integer): boolean;
+// Get mobs count in range
+function GetMobsCountInRange(p_Range: integer = 1000): integer;
 // Go to town if dead
 function GoHomeIfDead(): integer;
 // Check if character is locked in coordinates
@@ -75,31 +75,6 @@ begin
   Print(p_strMsg);
 end;
 
-function NeuroticClicksThread(): integer;
-var
-	count: integer;
-begin
-	Result := 0;
-
-	count := 0;
-	while (Delay(5000) and (count < 10)) do 
-	begin                                                         
-		if (Engine.Status = lsOnline) then 
-		begin                                        
-			if (not User.Moved) and (not User.InCombat) and (User.Cast.EndTime = 0) and ((User.Target = nil) or (User.Target.Dead)) then
-			begin
-				if (RndMoveTo(User.X, User.Y, User.Z)) then
-				begin
-					RndDelay(1000 + random(2000));
-					Inc(count);
-				end;
-			end else
-			begin
-				count := 0; // char is moving
-			end;
-		end;
-	end;
-end;
 
 function CheckCharIsDisarmed(): boolean;
 var
@@ -142,6 +117,43 @@ begin
 			end;
 		end;
 	end;
+end;
+
+function check_trains(mobs_count: integer = 5; R: integer = 1500; info_print: boolean = false): boolean;   // Функция, проверяющая паровозы вокруг перса в радиусе R и возвращающая true, если мобов больше чем mobs_count. info_print - распатывать инфу о паровозе или нет
+var i, j, mobs_in_train: integer;
+begin
+  Result:= false;
+  for i:= 0 to charlist.count-1 do begin
+    mobs_in_train:= 0;
+    if (user.distto(charlist.items(i)) < R*1.5) and (charlist.items(i).moved) then begin
+      for j:= 0 to npclist.count-1 do begin
+        if (npclist.items(j).target = charlist.items(i)) and (charlist.items(i).distto(npclist.items(j)) < R) then inc(mobs_in_train);
+        if (mobs_in_train >= mobs_count) then begin
+          Result:= true;
+          if (info_print) then print('Замечен паровоз из '+inttostr(mobs_in_train)+' мобов, бегут за '+charlist.items(i).name);
+          exit;
+        end;
+      end;
+    end;
+  end;
+end;
+
+function GetMobsCountInRange(p_Range: integer = 1000): integer;
+var 
+	i, countMobs: integer;
+begin
+	Result := 0;
+	countMobs := 0;
+	
+	for i:= 0 to npclist.count-1 do
+	begin
+		if ((user.distto(npclist.items(i)) < p_Range) and (abs(user.z - npclist.items(i).z) < 250) and (npclist.items(i).hp > 0)) then                 
+			Inc(countMobs);
+	end;
+	
+	Print('GetMobsCountInRange: ' + IntToStr(countMobs));
+			
+	Result := countMobs;
 end;
 
 function GoHomeIfDead(): integer;
@@ -348,7 +360,7 @@ end;
 function FarmOnSpot(pWayPoints: PRecordPointArray; p_spotId: integer; p_MaxSecondsOnSpot: integer; p_StarSpotIndex: integer): integer;
 var
 	secondsOnSpot, secondsNotInCombat: integer;
-	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat: boolean;
+	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat, bIsNoMobsAround: boolean;
 	spotRange : integer;
 	startSpotPoint: TRecordPoint;
 begin
@@ -389,7 +401,6 @@ begin
 			
 			// TODO: perform some char checks here, if they are not performed in threads
 			GoHomeIfDead();
-			// TODO: buffs
 			{
 			if (not User.Buffs.ByID(13515,Obj) or (Obj.EndTime<30000)) then 
 			begin // ИД бафа поменяй
@@ -397,8 +408,10 @@ begin
 				break;
 			end;
 			}
-			// Check if user is not in combat during last 8 seconds
+			
+			// Check if user is not in combat too long and ther is no any mobs 
 			bIsNotInCombatTooLong := IsNotInCombatTooLong(secondsNotInCombat);
+			bIsNoMobsAround := (GetMobsCountInRange(spotRange) = 0);
 			
 			// Check other players/GMs on spot.
 			bIsOtherPlayerDetected := IsOtherPlayerOnSpot(spotRange) or IsPvpOrPkAround(spotRange);
@@ -409,7 +422,17 @@ begin
 			
 			// Update spot conditions:
 			Inc(secondsOnSpot);
-			bNeedToGoToNextSpot := not bIsInCombat and ((secondsOnSpot > p_MaxSecondsOnSpot) or bIsOtherPlayerDetected or bIsNotInCombatTooLong);
+			
+			// Self hill:
+			if (not bIsInCombat and bIsNoMobsAround and (User.hp < 200)) then
+			begin
+				Print('User hp is slow. Need to have a rest for 20 seconds.');
+				Engine.Facecontrol(0, false);
+				RndDelay(20000);
+				Engine.Facecontrol(0, True);
+			end;	
+			
+			bNeedToGoToNextSpot := not bIsInCombat and ((secondsOnSpot > p_MaxSecondsOnSpot) or bIsOtherPlayerDetected or bIsNoMobsAround);
 			//Print('seconds on spot: ' + String(secondsOnSpot));
 		end;	
 
@@ -454,8 +477,7 @@ begin
 			
 		// Check if user in the hunting zone then start farming
 		// Init successfully, start boting process
-		// List of checks in threads
-		// Script.NewThread(@NeuroticClicksThread());    
+		// List of checks in threads  
 		// Script.NewThread(@CheckCharIsLocked()); 
 		// Script.NewThread(@CheckCharIsDebuffed()); 	
 		FarmMobsInHuntingZone();
