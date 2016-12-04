@@ -38,15 +38,15 @@ function RecordWayPoints(): integer;
 var
    wayPoints : TRecordPointArray;
    FileName : string;
-   PointLast, PointNew : PPoint;
+   PointLast, PointNew : TRecordPoint;
    recordPointFirst, recordPointSecond: TRecordPoint;
    spotId, index, secondsOnPoint : Integer;
    pointType : TPointType;
-   
+	const pointsCoint: integer = 512;
 begin
 	FileName := m_HuntingZonePath;
-	New(PointLast);
-	New(PointNew);
+	//New(PointLast);
+	//New(PointNew);
 	PointLast.X := 0;
 	PointLast.Y := 0;
 	PointLast.Z := 0;
@@ -56,23 +56,27 @@ begin
 
 	if (ReadWayPointsFile(FileName, @wayPoints) <= 0) then
 	begin
-		SetLength(wayPoints, 256);
+		SetLength(wayPoints, pointsCoint);
 		index := 0;
 	end else
 	begin
 		index := High(wayPoints);
-		SetLength(wayPoints, index + 256);
+		SetLength(wayPoints, index + pointsCoint);
 		spotId := wayPoints[index].SpotId + 1;
 		Inc(index);
 	end;
    
-	while Engine.Status = lsOnline do
+	while (index < pointsCoint) do
 	begin
 		delay(500);
 
-		PointNew.X := User.ToX;
-		PointNew.Y := User.ToY;   
-		PointNew.Z := User.ToZ;   
+		// Next Point where user is moving to
+		PointNew.X := User.X;
+		PointNew.Y := User.Y;   
+		PointNew.Z := User.Z;   
+		
+		// DEBUG: Print('PointNew: ' + IntToStr(PointNew.X) +',' + IntToStr(PointNew.Y) +','+IntToStr(PointNew.Z));
+		
 		if (PointNew.X <> PointLast.X) or (PointNew.Y <> PointLast.Y) or (PointNew.Z <> PointLast.Z)  then
 		begin
 			secondsOnPoint := 0;
@@ -107,7 +111,7 @@ begin
 			PointLast.Y := PointNew.Y;
 			PointLast.Z := PointNew.Z;
 
-			if (index > 256) then
+			if (index > pointsCoint) then
 				break;
 		end else
 		begin
@@ -119,13 +123,11 @@ begin
 	
 	SetLength(wayPoints, index+1);	
 	SaveWayPointsFile(FileName, @wayPoints);
-	//Dispose(PointLast);
-	//Dispose(PointNew);
 end;
 
 begin
 	Print('RecordPath script started.');
-	RndDelay(1000);
+	Delay(1000);
 	
 	// Algorithm is next
 	// 1. Load character in start point - tp point og current Grounds

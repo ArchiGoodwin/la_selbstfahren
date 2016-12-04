@@ -13,20 +13,20 @@ const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
 
 // deagleee	
 // const m_userConfig: string = 'deaglee';
-// const m_HuntingZonePath: string = 'Scripts/deaglee_/scripts/HuntingZonePath001';	
+// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingDeaglee_Lake_15';	
 	
 // Hwel	
-const m_userConfig: string = 'Hwel';
-const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
+// const m_userConfig: string = 'Hwel';
+// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
 
 // Weatherwax	
 // const m_userConfig: string = 'Weatherwax';
 // const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
 
 // GythaOgg	
-// const m_userConfig: string = 'GythaOgg';
+const m_userConfig: string = 'GythaOgg';
 // const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_8';
-// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_10';
+const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_10';
 
 type
 TPoint = packed record
@@ -122,8 +122,7 @@ begin
 		splittedString := TStringList.Create;
 		splittedString.Delimiter := ',';
 		splittedString.DelimitedText := stringList[i];
-		Print(stringlist[i]);
-		//New(RecordPointFirst);
+		//DEBUG: Print(stringlist[i]);
 		RecordPointFirst.SpotId := StrToInt(splittedString[0]);
 		RecordPointFirst.PointType := TPointType(StrToInt(splittedString[1]));
 		RecordPointFirst.X := StrToInt(splittedString[2]);

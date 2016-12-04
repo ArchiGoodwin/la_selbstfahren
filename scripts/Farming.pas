@@ -10,7 +10,7 @@ var
 
 // TODO: create a special logic, which will detect the Character name and load appropriate custom config file with next params: 
 const m_maxSecondsOnspot: integer = 25;
-const m_defaultSpotRange: integer = 1000;
+const m_defaultSpotRange: integer = 1200;
 const m_maxCountOfFailedSpots: integer = 3; // count of failed spots in a row
 const m_maxLoopsOnHuntingZone: integer = 2;
 const m_maxSecondsNotInCombat: integer = 4;
@@ -40,7 +40,7 @@ function CheckCharIsLocked(): integer;
 
 
 // Hunting zone. Sprint across the specific hunting zone.
-// TODO: in ideal the algorithm is next:
+// TODO: an ideal algorithm is next:
 // 1. Write the path with some profitable points of farming/spoiling
 // 2. Save this path in file for different locations for different characters
 // 3. Hunt on each part of hunting zone not so much time. Not much than 5 minutes, e.g.
@@ -151,7 +151,8 @@ begin
 			Inc(countMobs);
 	end;
 	
-	Print('GetMobsCountInRange: ' + IntToStr(countMobs));
+	if (countMobs = 0) then
+		Print('GetMobsCountInRange: ' + IntToStr(countMobs));
 			
 	Result := countMobs;
 end;
@@ -253,7 +254,8 @@ begin
 	Print('FarmMobsInHuntingZone: Count of loaded spots: ' + IntToStr(countSpot));
 	
 	spotId := wayPoints[0].SpotId;
-	Engine.LoadConfig(m_userConfig);    
+	Engine.LoadConfig(m_userConfig);  
+	Engine.Facecontrol(0, false);	
 
 	// Check the start point of farming from the array of way points
 	while ((spotId < countSpot) and bCanToGoToNextSpot) do 
@@ -306,6 +308,7 @@ begin
 					begin
 						// Check if loops are allowed on hunting zone - reset zone spot Id
 						Inc(countZoneLoops);
+						Print('FarmMobsInHuntingZone: completed loop: ' + IntToStr(countZoneLoops));
 						if (countZoneLoops < m_maxLoopsOnHuntingZone) then
 						begin
 							spotId := wayPoints[0].SpotId;
@@ -423,14 +426,17 @@ begin
 			// Update spot conditions:
 			Inc(secondsOnSpot);
 			
+			// TODO:
 			// Self hill:
-			if (not bIsInCombat and bIsNoMobsAround and (User.hp < 200)) then
+			{
+			if (not bIsInCombat and bIsNoMobsAround and (User.hp < 300)) then
 			begin
 				Print('User hp is slow. Need to have a rest for 20 seconds.');
 				Engine.Facecontrol(0, false);
-				RndDelay(20000);
+				RndDelay(10000);
 				Engine.Facecontrol(0, True);
 			end;	
+			}
 			
 			bNeedToGoToNextSpot := not bIsInCombat and ((secondsOnSpot > p_MaxSecondsOnSpot) or bIsOtherPlayerDetected or bIsNoMobsAround);
 			//Print('seconds on spot: ' + String(secondsOnSpot));
