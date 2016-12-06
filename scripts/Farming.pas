@@ -411,7 +411,11 @@ begin
 				break;
 			end;
 			}
-			
+			// List of checks in threads  
+			// Script.NewThread(@CheckCharIsLocked()); 
+			// Script.NewThread(@CheckCharIsDebuffed()); 	
+				
+				
 			// Check if user is not in combat too long and ther is no any mobs 
 			bIsNotInCombatTooLong := IsNotInCombatTooLong(secondsNotInCombat);
 			bIsNoMobsAround := (GetMobsCountInRange(spotRange) = 0);
@@ -427,7 +431,7 @@ begin
 			Inc(secondsOnSpot);
 			
 			// TODO:
-			// Self hill:
+			// Self hill and buff - need to create a special function
 			{
 			if (not bIsInCombat and bIsNoMobsAround and (User.hp < 300)) then
 			begin
@@ -444,8 +448,11 @@ begin
 
 		// Need to come back to the start point of sport to continue moving throw the path
 		if (User.InRange(startSpotPoint.X, startSpotPoint.Y, startSpotPoint.Z, spotRange)) then
+		begin
+			Engine.Facecontrol(0, false);
 			if (RndMoveTo(startSpotPoint.X, startSpotPoint.Y, startSpotPoint.Z)) then
 				RndDelay(1000);
+		end;
 	end else
 	begin
 		Print('User is OUT of START SPOT point.');

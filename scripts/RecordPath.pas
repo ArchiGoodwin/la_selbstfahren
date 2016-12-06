@@ -68,12 +68,12 @@ begin
    
 	while (index < pointsCoint) do
 	begin
-		delay(500);
+		delay(200);
 
 		// Next Point where user is moving to
-		PointNew.X := User.X;
-		PointNew.Y := User.Y;   
-		PointNew.Z := User.Z;   
+		PointNew.X := User.ToX;
+		PointNew.Y := User.ToY;   
+		PointNew.Z := User.ToZ;   
 		
 		// DEBUG: Print('PointNew: ' + IntToStr(PointNew.X) +',' + IntToStr(PointNew.Y) +','+IntToStr(PointNew.Z));
 		
@@ -115,9 +115,12 @@ begin
 				break;
 		end else
 		begin
-			Inc(secondsOnPoint);
-			If (secondsOnPoint >= 10) then // 1 secondsOnPoint == 500ms
-				break;
+			If (not user.moved()) then
+			begin
+				Inc(secondsOnPoint);
+				If (secondsOnPoint >= 10) then 
+					break;
+			end;		
 		end;	
 	end;
 	
