@@ -8,26 +8,6 @@ uses SysUtils, Classes, RegExpr;
 const m_intRndMove: integer = 60;
 const m_intRndDelay: integer = 100;
 
-// General constants for way point files
-const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
-
-// deagleee	
-// const m_userConfig: string = 'deaglee';
-// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingDeaglee_Lake_15';	
-	
-// Hwel	
-// const m_userConfig: string = 'Hwel';
-// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
-
-// Weatherwax	
-// const m_userConfig: string = 'Weatherwax';
-// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
-
-// GythaOgg	
-const m_userConfig: string = 'GythaOgg';
-// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_8';
-const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_10';
-
 type
 TPoint = packed record
    X: Integer;
