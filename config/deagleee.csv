@@ -1,5 +1,4 @@
-'SPOT_CONFIG',25,1600,3,2,4
-'SPOT_CONFIG_DEBUG'MaxSecondsOnspot: integer, SpotRange: integer, MaxCountOfFailedSpots: integer,MaxLoopsOnHuntingZone: integer, MaxSecondsNotInCombat: integer 
-'SPOT_NAME',0,15,'HuntingDeaglee_Lake_15'
-'SPOT_NAME',0,17,'HuntingDeaglee_AntNest_17'
-'SPOT_NAME_DEBUG','TOWN_ID',USER_LVL,'SPOT_FILE_PATH'		
+SPOT_CONFIG,25,1600,3,2,4
+SPOT_CONFIG_DEBUG, MaxSecondsOnspot: integer, SpotRange: integer, MaxCountOfFailedSpots: integer,MaxLoopsOnHuntingZone: integer, MaxSecondsNotInCombat: integer 
+SPOT_NAME,0,15,HuntingDeaglee_Lake_15
+SPOT_NAME_DEBUG,'TOWN_ID',USER_LVL,'SPOT_FILE_PATH'		

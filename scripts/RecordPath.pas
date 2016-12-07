@@ -6,7 +6,7 @@ uses SysUtils, Classes, Moving, UserConfig;
 
 // Functions declaration
 function SaveWayPointsFile(strFileName: string; wayPoints: PRecordPointArray): integer;
-function RecordWayPoints(): integer;
+function RecordWayPoints(strFileName: string): integer;
 
 implementation
 
@@ -17,7 +17,7 @@ var
 	stringList: TStringList;
 	wayPoint: TRecordPoint;
 begin
-	FileName := './' + strFileName + '.txt';
+	FileName := './' + strFileName + '.csv';
 	stringList := TStringList.Create;
 	Print('SaveWayPointsFile: '+ FileName);
 	
@@ -29,34 +29,32 @@ begin
 
 	stringList.SaveToFile(FileName);
 	// TODO:
-	//	stringList.Free();
+	stringList.Free();
 	Result := i;
 	Print('Points count: ' + IntToStr(i));
 end;
 
-function RecordWayPoints(): integer;
+function RecordWayPoints(strFileName: string): integer;
 var
-   wayPoints : TRecordPointArray;
-   FileName : string;
-   PointLast, PointNew : TRecordPoint;
-   recordPointFirst, recordPointSecond: TRecordPoint;
-   spotId, index, secondsOnPoint : Integer;
-   pointType : TPointType;
-   userState: TUserConfig;
+	wayPoints : TRecordPointArray;
+	PointLast, PointNew : TRecordPoint;
+	recordPointFirst, recordPointSecond: TRecordPoint;
+	spotId, index, secondsOnPoint, countRecordedPoints : Integer;
+	pointType : TPointType;
+
 	const pointsCoint: integer = 512;
 begin
-	// Read user config:
-	userState := UserConfig.LoadUserConfig(User.Name);
+	Result := -1;
 	
-	FileName := m_wayPointsPath + userState.CurrentHuntingZone;
 	PointLast.X := 0;
 	PointLast.Y := 0;
 	PointLast.Z := 0;
 	pointType := START_WAY;
 	spotId := 0;
 	secondsOnPoint := 0;
+	countRecordedPoints := 0;
 
-	if (ReadWayPointsFile(FileName, @wayPoints) <= 0) then
+	if (ReadWayPointsFile(strFileName, @wayPoints) <= 0) then
 	begin
 		SetLength(wayPoints, pointsCoint);
 		index := 0;
@@ -100,6 +98,7 @@ begin
 			wayPoints[index] := recordPointFirst;
 			Print('Point: ' + IntToStr(recordPointFirst.X) +',' + IntToStr(recordPointFirst.Y) +','+IntToStr(recordPointFirst.Z));
 			Inc(index);
+			Inc(countRecordedPoints);
 
 			//	Always add the last poit to START_SPOT 
 			recordPointFirst.PointType := START_SPOT;
@@ -120,16 +119,25 @@ begin
 			If (not user.moved()) then
 			begin
 				Inc(secondsOnPoint);
-				If (secondsOnPoint >= 10) then 
+				If (secondsOnPoint >= 15) then 
 					break;
 			end;		
 		end;	
 	end;
 	
-	SetLength(wayPoints, index+1);	
-	SaveWayPointsFile(FileName, @wayPoints);
+	if (countRecordedPoints > 2) then 
+	begin	
+		SetLength(wayPoints, index+1);	
+		SaveWayPointsFile(strFileName, @wayPoints);
+	end else
+		Print('RecordWayPoints: user is not moving.');
+		
+	Result := 0;
 end;
 
+var
+	userState: TUserConfig;
+	countSpots: integer;
 begin
 	Print('RecordPath script started.');
 	Delay(1000);
@@ -138,7 +146,23 @@ begin
 	// 1. Load character in start point - tp point og current Grounds
 	// 2. Need to record N start points of ways to N start points of farm spots
 	// 3. After that it should be possible to load from file all data about waypoints
-	RecordWayPoints();
+	
+	// Read user config:
+	userState := UserConfig.LoadUserConfig(User.Name);
+	if (userState.CurrentHuntingZone = '') then
+	begin
+		Print('RecordPath: CurrentHuntingZone parameter is empty.');
+		exit();
+	end;
+	
+	countSpots := 0;
+	while ((User.HP > 0) and (RecordWayPoints(m_wayPointsPath + userState.CurrentHuntingZone) >= 0) and (countSpots < 20)) do
+	begin
+		Inc(countSpots);
+		Print('RecordPath: spots recorded: ' + IntToStr(countSpots));
+	end;
+	
+	Print('RecordPath: END.');
 end.
 
 
