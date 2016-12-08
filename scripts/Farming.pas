@@ -243,7 +243,7 @@ begin
 	// File should be created independently in RecordPath unit for any of hunting zone.
 	fileNameWayPoints := m_userState.CurrentHuntingZone;
 	
-	countSpot := ReadWayPointsFile(fileNameWayPoints, @wayPoints);
+	countSpot := ReadWayPointsFile(m_wayPointsPath + fileNameWayPoints, @wayPoints);
     if (countSpot < 1) then
 	begin
 		Print('No wayPoints loaded from file.');

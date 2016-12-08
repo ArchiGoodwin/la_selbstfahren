@@ -19,7 +19,6 @@ const m_maxSecondsNotInCombat: integer = 4;
 // deagleee	
 // const m_userConfig: string = 'deaglee';
 // const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingDeaglee_Lake_15';	
-// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingDeaglee_AntNest_17';	
 	
 // Hwel	
 // const m_userConfig: string = 'Hwel';

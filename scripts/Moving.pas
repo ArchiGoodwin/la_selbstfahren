@@ -79,7 +79,7 @@ var
 	splittedString : TStringList;
 begin
 	stringList := TStringList.Create;
-	fileNameWayPoints := './' + strFileName + '.txt';
+	fileNameWayPoints := './' + strFileName + '.csv';
 	Print('ReadWayPointsFile: '+ fileNameWayPoints);
 	
 	if FileExists(fileNameWayPoints) then
