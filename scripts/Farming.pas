@@ -2,18 +2,10 @@ unit Farming;
 
 interface
 
-uses SysUtils, Classes, RegExpr, Moving;
+uses SysUtils, Classes, Moving, UserConfig;
 
 var
-	m_isDead: boolean = false;
-	m_equippedWeaponID: integer = -1;
-
-// TODO: create a special logic, which will detect the Character name and load appropriate custom config file with next params: 
-const m_maxSecondsOnspot: integer = 25;
-const m_defaultSpotRange: integer = 1200;
-const m_maxCountOfFailedSpots: integer = 3; // count of failed spots in a row
-const m_maxLoopsOnHuntingZone: integer = 2;
-const m_maxSecondsNotInCombat: integer = 4;
+	m_userState: TUserConfig; 
 	
 // Init function. Can be replaced with True Class constructor
 function InitializeLocalVariables(): integer;	
@@ -62,10 +54,16 @@ begin
 	end
 	else begin
 		Print('InitializeLocalVariables');
+		m_userState := UserConfig.LoadUserConfig(User.Name);
+		
 		// TODO: load some special variables for current character
-		// TODO: m_equippedWeaponID :=
-		m_isDead := (User.HP = 0);
-		//Gps.LoadBase(exepath+'\qpath.db3');  
+		with m_userState do
+		begin
+			IsDead := (User.HP = 0);
+			// CurrentPath: string; it should be changed in Hunting Zone logic
+			//EquippedWeaponID : integer;
+		end;
+		
 	end;
 end;
 
@@ -163,7 +161,7 @@ begin
 	
 	if (User.HP=0) then
 	begin
-		m_isDead := true;
+		m_userState.IsDead := true;
 		RndDelay(500);
 		Engine.GoHome;
 		Engine.Facecontrol(0, False);
@@ -172,7 +170,7 @@ begin
 		Result := -1;
 		if (User.HP>0) then 
 		begin
-			m_isDead := false;
+			m_userState.IsDead := false;
 			Result := 1;
 		end;
 	end;
@@ -243,7 +241,7 @@ begin
 	
 	// Load wayPoints from file for hunting zone
 	// File should be created independently in RecordPath unit for any of hunting zone.
-	fileNameWayPoints := m_HuntingZonePath;
+	fileNameWayPoints := m_userState.CurrentHuntingZone;
 	
 	countSpot := ReadWayPointsFile(fileNameWayPoints, @wayPoints);
     if (countSpot < 1) then
@@ -254,7 +252,7 @@ begin
 	Print('FarmMobsInHuntingZone: Count of loaded spots: ' + IntToStr(countSpot));
 	
 	spotId := wayPoints[0].SpotId;
-	Engine.LoadConfig(m_userConfig);  
+	Engine.LoadConfig(m_userState.UserName);  
 	Engine.Facecontrol(0, false);	
 
 	// Check the start point of farming from the array of way points

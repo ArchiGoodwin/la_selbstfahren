@@ -2,7 +2,7 @@ Unit RecordPath;
 
 interface
 
-uses SysUtils, Classes, Moving;
+uses SysUtils, Classes, Moving, UserConfig;
 
 // Functions declaration
 function SaveWayPointsFile(strFileName: string; wayPoints: PRecordPointArray): integer;
@@ -42,11 +42,13 @@ var
    recordPointFirst, recordPointSecond: TRecordPoint;
    spotId, index, secondsOnPoint : Integer;
    pointType : TPointType;
+   userState: TUserConfig;
 	const pointsCoint: integer = 512;
 begin
-	FileName := m_HuntingZonePath;
-	//New(PointLast);
-	//New(PointNew);
+	// Read user config:
+	userState := UserConfig.LoadUserConfig(User.Name);
+	
+	FileName := m_wayPointsPath + userState.CurrentHuntingZone;
 	PointLast.X := 0;
 	PointLast.Y := 0;
 	PointLast.Z := 0;
