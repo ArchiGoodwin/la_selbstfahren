@@ -9,25 +9,13 @@ const m_scriptsPath: string = 'Scripts/la_selbstfahren/';
 const m_wayPointsPath: string = 'Scripts/la_selbstfahren/paths/';
 const m_configPath: string = m_scriptsPath + 'config/';
 
-const m_maxSecondsOnspot: integer = 25;
-const m_defaultSpotRange: integer = 1600;
-const m_maxCountOfFailedSpots: integer = 3; // count of failed spots in a row
-const m_maxLoopsOnHuntingZone: integer = 2;
-const m_maxSecondsNotInCombat: integer = 4;
+const DEF_MAX_SECONDS_ON_SPOT: integer = 25;
+const DEF_SPOT_RANGE: integer = 1600;
+const DEF_MAX_COUNT_OF_FAILED_SPOTS: integer = 3; // count of failed spots in a row
+const DEF_MAX_LOOPS_ON_HUNTING_ZONE: integer = 2;
+const DEF_MAX_SECONDS_NOT_IN_COMBAT: integer = 4;
 
-// TODO: move all these pathes into config files:
-// deagleee	
-// const m_userConfig: string = 'deaglee';
-// const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingDeaglee_Lake_15';	
-	
-// Hwel	
-// const m_userConfig: string = 'Hwel';
-// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingHwel_Mithryl_15';	
-
-// Weatherwax	
-// const m_userConfig: string = 'Weatherwax';
-// const m_HuntingZonePath: string =  m_wayPointsPath + 'HuntingWeatherwax_startLoc_10';	
-
+// TODO: move all these pathes into config files:	
 // GythaOgg	
 // const m_userConfig: string = 'GythaOgg';
 // const m_HuntingZonePath: string = m_wayPointsPath + 'HuntingGythaOgg_StartLoc_8';
@@ -67,11 +55,11 @@ begin
 		UserName := p_UserName;
 		IsDead := false;
 		CurrentHuntingZone := '';
-		MaxSecondsOnspot := m_maxSecondsOnspot;
-		SpotRange := m_defaultSpotRange;
-		MaxCountOfFailedSpots := m_maxCountOfFailedSpots;
-		MaxLoopsOnHuntingZone := m_maxLoopsOnHuntingZone;
-		MaxSecondsNotInCombat := m_maxSecondsNotInCombat;
+		MaxSecondsOnspot := DEF_MAX_SECONDS_ON_SPOT;
+		SpotRange := DEF_SPOT_RANGE;
+		MaxCountOfFailedSpots := DEF_MAX_COUNT_OF_FAILED_SPOTS;
+		MaxLoopsOnHuntingZone := DEF_MAX_LOOPS_ON_HUNTING_ZONE;
+		MaxSecondsNotInCombat := DEF_MAX_SECONDS_NOT_IN_COMBAT;
 		EquippedWeaponID := -1;
 	end;
 	

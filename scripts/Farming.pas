@@ -29,7 +29,8 @@ function GetMobsCountInRange(p_Range: integer = 1000): integer;
 function GoHomeIfDead(): integer;
 // Check if character is locked in coordinates
 function CheckCharIsLocked(): integer;
-
+// Returns mobs count, which have user in taget:
+function GetMobsCountUserInTarget(p_range: integer = 1000): integer; 
 
 // Hunting zone. Sprint across the specific hunting zone.
 // TODO: an ideal algorithm is next:
@@ -155,6 +156,25 @@ begin
 	Result := countMobs;
 end;
 
+function GetMobsCountUserInTarget(p_range: integer = 1000): integer; 
+var
+	i, mobsCount: integer;
+begin
+	Result := 0;
+	mobsCount := 0;
+	
+	for i:= 0 to npclist.count-1 do 
+	begin
+		// Agr mob can either run either cast 
+		if ((user.distto(npclist.items(i)) < p_range) and (npclist.items(i).hp > 0) and (npclist.items(i).target = User) and
+		(abs(user.z - npclist.items(i).z) < 250) and (npclist.items(i).Moved)) then 
+				Inc(mobsCount);
+	end;
+	
+	Print('GetMobsCountUserInTarget: ' + IntToStr(mobsCount));
+	Result := mobsCount;
+end;
+
 function GoHomeIfDead(): integer;
 begin
 	Result := 0;
@@ -208,7 +228,7 @@ end;
 
 function IsNotInCombatTooLong(var p_seconds: integer): boolean;
 begin
-	// Check if user is not in combat during last 8 seconds
+	// Check if user is not in combat during last m_maxSecondsNotInCombat seconds
 	if ((NOT User.Moved) AND (User.Cast.EndTime = 0) AND ((User.Target = nil) or (User.Target.Dead))) then
 	begin	
 		Inc(p_seconds);
@@ -221,8 +241,9 @@ begin
 	end else
 		p_seconds := 0;
 	
-	Result := p_seconds > m_maxSecondsNotInCombat;
+	Result := p_seconds > m_userState.MaxSecondsNotInCombat;
 end;
+
 
 function FarmMobsInHuntingZone(): integer;
 var
@@ -263,10 +284,10 @@ begin
 		// TODO: it makes sense to add DoBuff() here
 		
 		// 1. Find nearest waypoint
-		index := FindNearestWayPoint(@wayPoints, m_defaultSpotRange, spotId);
+		index := FindNearestWayPoint(@wayPoints, m_userState.SpotRange, spotId);
 		
 		if (index = -1) then // didn't find the waypoint for specific spot, try to find any waypoint
-			index := FindNearestWayPoint(@wayPoints, m_defaultSpotRange, -1);
+			index := FindNearestWayPoint(@wayPoints, m_userState.SpotRange, -1);
 		
 		if ((index > -1) and (index < high(wayPoints))) then 
 		begin
@@ -287,16 +308,16 @@ begin
 				end else
 				begin
 					// 4. Farm On current START SPOT point.
-					if (FarmOnSpot(@wayPoints, spotId, m_maxSecondsOnspot, index) < 0) then
+					if (FarmOnSpot(@wayPoints, spotId, m_userState.MaxSecondsOnspot, index) < 0) then
 					begin
-						Print('FarmMobsInHuntingZone: Something wrong with last spot. Cannot continue to farm on this spot.');
+						Print('FarmMobsInHuntingZone: Something wrong with current spot. Cannot continue to farm on this spot.');
 						// Add here a counter of failed spots in current hunting zone. Can use it to halt.
 						Inc(countFailedSpots);
-						if (countFailedSpots > m_maxCountOfFailedSpots) then 
+						if (countFailedSpots > m_userState.MaxCountOfFailedSpots) then 
 							bCanToGoToNextSpot := false;
 					end
 					else begin
-						Print('FarmMobsInHuntingZone: Farming on last spot was completed.');
+						Print('FarmMobsInHuntingZone: Farming on current spot was completed.');
 					end;
 					
 					Inc(spotId);
@@ -307,10 +328,10 @@ begin
 						// Check if loops are allowed on hunting zone - reset zone spot Id
 						Inc(countZoneLoops);
 						Print('FarmMobsInHuntingZone: completed loop: ' + IntToStr(countZoneLoops));
-						if (countZoneLoops < m_maxLoopsOnHuntingZone) then
+						if (countZoneLoops < m_userState.MaxLoopsOnHuntingZone) then
 						begin
 							spotId := wayPoints[0].SpotId;
-							Print('FarmMobsInHuntingZone: completed ' + IntToStr(countZoneLoops) + ' loop of ' + IntToStr(m_maxLoopsOnHuntingZone));
+							Print('FarmMobsInHuntingZone: completed ' + IntToStr(countZoneLoops) + ' loop of ' + IntToStr(m_userState.MaxLoopsOnHuntingZone));
 						end;
 					end;
 				end
@@ -360,16 +381,15 @@ end;
 
 function FarmOnSpot(pWayPoints: PRecordPointArray; p_spotId: integer; p_MaxSecondsOnSpot: integer; p_StarSpotIndex: integer): integer;
 var
-	secondsOnSpot, secondsNotInCombat: integer;
-	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat, bIsNoMobsAround: boolean;
-	spotRange : integer;
+	secondsOnSpot, secondsNotInCombat, spotRange: integer;
+	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat, bIsNoMobsAround, bIsTimeOnSpotEnded: boolean;
 	startSpotPoint: TRecordPoint;
 begin
 	Print('FarmOnSpot(spotId: '+IntToStr(p_spotId)+'; max seconds on spot: '+IntToStr(p_MaxSecondsOnSpot));
 	
 	Result := 0;
 	bNeedToGoToNextSpot := false;
-	spotRange := m_defaultSpotRange;
+	spotRange := m_userState.SpotRange;
 	
 	// Define startSpotPoint
 	if ((p_StarSpotIndex > -1) and (p_StarSpotIndex <= high(pWayPoints^))) then
@@ -399,6 +419,7 @@ begin
 		while (User.InRange(startSpotPoint.X, startSpotPoint.Y, startSpotPoint.Z, spotRange) and (not bNeedToGoToNextSpot)) do 
 		begin  
 			Delay(1000); // Always 1 second
+			Inc(secondsOnSpot);
 			
 			// TODO: perform some char checks here, if they are not performed in threads
 			GoHomeIfDead();
@@ -424,9 +445,7 @@ begin
 				Result := -2;
 				
 			bIsInCombat := (not User.Cast.EndTime = 0) or not ((User.Target = nil) or (User.Target.Dead));	
-			
-			// Update spot conditions:
-			Inc(secondsOnSpot);
+			bIsTimeOnSpotEnded := (secondsOnSpot > p_MaxSecondsOnSpot);
 			
 			// TODO:
 			// Self hill and buff - need to create a special function
@@ -440,7 +459,12 @@ begin
 			end;	
 			}
 			
-			bNeedToGoToNextSpot := not bIsInCombat and ((secondsOnSpot > p_MaxSecondsOnSpot) or bIsOtherPlayerDetected or bIsNoMobsAround);
+			// Check do we need to change spot:
+			bNeedToGoToNextSpot := not bIsInCombat and (bIsTimeOnSpotEnded or bIsOtherPlayerDetected or bIsNoMobsAround or bIsNotInCombatTooLong);
+			
+			// Cannot leave spot until kill the mob whi tries to kill User:
+			if (bNeedToGoToNextSpot and (GetMobsCountUserInTarget(spotRange) > 0)) then
+				bNeedToGoToNextSpot := false;
 			//Print('seconds on spot: ' + String(secondsOnSpot));
 		end;	
 
