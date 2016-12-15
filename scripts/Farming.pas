@@ -19,6 +19,7 @@ function AddMsgToLog(p_strMsg: string): integer;
 // TODO: add check and fix DeBuffs
 //function CheckCharDeBuffed(): boolean;
 function IsOtherPlayerOnSpot(p_Range: integer): boolean;
+function IsOtherPlayerInFriendList(p_charName: string): boolean;
 // Check agro players:
 function IsPvpOrPkAround(p_Range: integer): boolean;
 // Check that char is not in combat and make rnd step
@@ -202,7 +203,7 @@ begin
 	Result:=false;
 	for i:=0 to CharList.Count-1 do
 		begin
-		if ((CharList.Items(i).Inzone) and (not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and (CharList.Items(i).target = user)) then
+		if ((not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and (CharList.Items(i).target = user)) then
 			if CharList.Items(i).Pvp or CharList.Items(i).PK then 
 			begin 
 			print('This character: '+CharList.Items(i).name+' is trying to kill me!');
@@ -217,13 +218,22 @@ begin
 	Result:=false;
 	for i:=0 to CharList.Count-1 do
 	begin
-		if ((CharList.Items(i).Inzone) and (not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and 
+		if (not IsOtherPlayerInFriendList(CharList.Items(i).name)) then 
+		if ((not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and 
 			(User.InRange(CharList.Items(i).X, CharList.Items(i).Y, CharList.Items(i).Z, p_Range))) then
 		begin 
 			print('Leaving spot because the next Char has been found: '+CharList.Items(i).name);
 			Result:=true;
 		end;
 	end;
+end;
+
+function IsOtherPlayerInFriendList(p_charName: string): boolean;
+begin
+// TODO: add special list of friends
+Result := false;	
+	if (p_charName = m_userState.PartyMember) then
+		Result := true;
 end;
 
 function IsNotInCombatTooLong(var p_seconds: integer): boolean;

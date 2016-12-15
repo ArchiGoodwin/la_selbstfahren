@@ -32,6 +32,8 @@ TUserConfig = packed record
 	MaxLoopsOnHuntingZone: integer;
 	MaxSecondsNotInCombat: integer;
 	EquippedWeaponID: integer;
+	PartyMember: string;
+	CurrentHuntingZoneId: integer;
 	// TODO: add an array of available hunting zones for current user 
 end;
 
@@ -61,6 +63,8 @@ begin
 		MaxLoopsOnHuntingZone := DEF_MAX_LOOPS_ON_HUNTING_ZONE;
 		MaxSecondsNotInCombat := DEF_MAX_SECONDS_NOT_IN_COMBAT;
 		EquippedWeaponID := -1;
+		PartyMember := '';
+		CurrentHuntingZoneId := 0;
 	end;
 	
 	Result := userState;
@@ -88,7 +92,15 @@ begin
 		//DEBUG: 
 		Print(stringlist[i]);
 
-		if (splittedString[0] = 'SPOT_CONFIG') then
+		if (splittedString[0] = 'CHARACTER_CONFIG') then
+		begin
+			with userState do
+			begin
+				PartyMember := splittedString[2];
+				CurrentHuntingZoneId := StrToInt(splittedString[1]);
+			end;
+		end
+		else if (splittedString[0] = 'SPOT_CONFIG') then
 		begin
 			// TODO: load special variables for current character
 			with userState do
@@ -99,10 +111,10 @@ begin
 				MaxLoopsOnHuntingZone := StrToInt(splittedString[4]);
 				MaxSecondsNotInCombat := StrToInt(splittedString[5]);
 			end;
-		end else
-		if (splittedString[0] = 'SPOT_NAME') then
+		end
+		else if (splittedString[0] = 'SPOT_NAME') then
 		begin
-			userState.CurrentHuntingZone := splittedString[3];
+			userState.CurrentHuntingZone := splittedString[4];
 		end;
 
 		Inc(i);
