@@ -30,6 +30,7 @@ function GetMobsCountInRange(p_Range: integer = 1000): integer;
 function GoHomeIfDead(): integer;
 // Check if character is locked in coordinates
 function CheckCharIsLocked(): integer;
+function CheckCharSits(): boolean;
 // Returns mobs count, which have user in taget:
 function GetMobsCountUserInTarget(p_range: integer = 1000): integer; 
 
@@ -57,6 +58,8 @@ begin
 	else begin
 		Print('InitializeLocalVariables');
 		m_userState := UserConfig.LoadUserConfig(User.Name);
+		
+		// StartLogSession(m_userState);
 		
 		// TODO: load some special variables for current character
 		with m_userState do
@@ -116,6 +119,23 @@ begin
 				// engine.gameclose;
 			end;
 		end;
+	end;
+end;
+
+function CheckCharSits(): boolean;
+begin
+	Result := false;
+	if (engine.status = lsonline) then
+	begin
+		if(user.sitting) then
+		begin
+			Result := true;
+			// playsound(exepath+'\Sounds\sirena.wav');
+			engine.blinkwindow(true);
+			//engine.facecontrol(0,false);
+			print('CRITICAL_CHANGE > Char has been sat! ');
+		end;
+		RndDelay(300);
 	end;
 end;
 
@@ -220,7 +240,7 @@ begin
 	begin
 		if (not IsOtherPlayerInFriendList(CharList.Items(i).name)) then 
 		if ((not CharList.Items(i).Dead) and (Abs(CharList.Items(i).z-User.z)<1000) and 
-			(User.InRange(CharList.Items(i).X, CharList.Items(i).Y, CharList.Items(i).Z, p_Range))) then
+			(User.InRange(CharList.Items(i).X, CharList.Items(i).Y, CharList.Items(i).Z, 2*p_Range))) then
 		begin 
 			print('Leaving spot because the next Char has been found: '+CharList.Items(i).name);
 			Result:=true;
@@ -237,16 +257,17 @@ Result := false;
 end;
 
 function IsNotInCombatTooLong(var p_seconds: integer): boolean;
+const rndStep: integer = 40;
 begin
 	// Check if user is not in combat during last m_maxSecondsNotInCombat seconds
 	if ((NOT User.Moved) AND (User.Cast.EndTime = 0) AND ((User.Target = nil) or (User.Target.Dead))) then
 	begin	
 		Inc(p_seconds);
-		if (p_seconds mod 2 = 0) then //rnd step each 3 seconds
+		if (p_seconds mod 1 = 0) then //rnd step 
 		begin
-			RndDelay(50);
-			RndMoveTo(User.X, User.Y, User.Z);
 			Print('IsNotInCombatTooLong: seconds ' + IntToStr(p_seconds));
+			RndMoveTo(User.X + random(2*rndStep)-rndStep, User.Y + random(2*rndStep)-rndStep, User.Z);
+			RndDelay(50);
 		end
 	end else
 		p_seconds := 0;
@@ -290,14 +311,15 @@ begin
 	while ((spotId < countSpot) and bCanToGoToNextSpot) do 
 	begin
 		RndDelay(500);
-		GoHomeIfDead();		
+		// TODO: not go home at 1 second.
+		// GoHomeIfDead();		
 		// TODO: it makes sense to add DoBuff() here
 		
 		// 1. Find nearest waypoint
 		index := FindNearestWayPoint(@wayPoints, m_userState.SpotRange, spotId);
 		
 		if (index = -1) then // didn't find the waypoint for specific spot, try to find any waypoint
-			index := FindNearestWayPoint(@wayPoints, m_userState.SpotRange, -1);
+			index := FindNearestWayPoint(@wayPoints, m_userState.SpotRange*2, -1);
 		
 		if ((index > -1) and (index < high(wayPoints))) then 
 		begin
@@ -392,7 +414,8 @@ end;
 function FarmOnSpot(pWayPoints: PRecordPointArray; p_spotId: integer; p_MaxSecondsOnSpot: integer; p_StarSpotIndex: integer): integer;
 var
 	secondsOnSpot, secondsNotInCombat, spotRange: integer;
-	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat, bIsNoMobsAround, bIsTimeOnSpotEnded: boolean;
+	bNeedToGoToNextSpot, bIsOtherPlayerDetected, bIsNotInCombatTooLong, bIsInCombat, bIsNoMobsAround, bIsTimeOnSpotEnded
+	, bIsCriticalChange: boolean;
 	startSpotPoint: TRecordPoint;
 begin
 	Print('FarmOnSpot(spotId: '+IntToStr(p_spotId)+'; max seconds on spot: '+IntToStr(p_MaxSecondsOnSpot));
@@ -433,6 +456,8 @@ begin
 			
 			// TODO: perform some char checks here, if they are not performed in threads
 			GoHomeIfDead();
+			bIsCriticalChange := CheckCharSits();
+			
 			{
 			if (not User.Buffs.ByID(13515,Obj) or (Obj.EndTime<30000)) then 
 			begin // ИД бафа поменяй
@@ -470,7 +495,11 @@ begin
 			}
 			
 			// Check do we need to change spot:
-			bNeedToGoToNextSpot := not bIsInCombat and (bIsTimeOnSpotEnded or bIsOtherPlayerDetected or bIsNoMobsAround or bIsNotInCombatTooLong);
+			bNeedToGoToNextSpot := bIsCriticalChange or 
+			(not bIsInCombat and ( bIsTimeOnSpotEnded 
+								or bIsOtherPlayerDetected 
+								or bIsNoMobsAround 
+								or bIsNotInCombatTooLong));
 			
 			// Cannot leave spot until kill the mob whi tries to kill User:
 			if (bNeedToGoToNextSpot and (GetMobsCountUserInTarget(spotRange) > 0)) then
