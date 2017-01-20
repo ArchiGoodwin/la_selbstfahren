@@ -61,21 +61,33 @@ begin
 		Exit();
 	end;
 	
+	// TODO: Load Session_CharNane.csv
+	// TODO: define actual activity type
+	// If session was not so later:
+		//define last activity
+			// If current activity is ACT_HUNTING
+				// TODO: need to know how much hunting zones the character has already visited and when.
+				// Check if user in the hunting zone then start farming
+					// FarmMobsInHuntingZone();
+				// else - Need to select the next hunting zone where the char is in Town.
+			// If current activity is ACT_TRADING
+				// TODO: implement trading module 
+		
+	// else create a new session. file...
+		// Use char activity priorities to define what to do next.
+		// When defined, start with first activity.
+		
+	// Continue session until any of stop flags is true.
+		// z.b. count of activities for actual session is 10 or total duration of session is 4 hours.
+		
+	// at the end of session save a copy of last session file.
+		// log out or do nothing in town.
+	
 	if (GoHomeIfDead() > -1) then 
 	begin
 		//TODO: check if user in town then go to gk
 		// MoveToGK();
 
-		// TODO: need to know how much hunting zones the character has already visited.
-		// Need to save into special log the list of these zones.
-		// Need to select the next hunting zone where the char is in Town.
-			
-		// Check if user in the hunting zone then start farming
-		// Init successfully, start boting process
-		// List of checks in threads  
-		// Script.NewThread(@CheckCharIsLocked()); 
-		// Script.NewThread(@CheckCharIsDebuffed()); 	
-		FarmMobsInHuntingZone();
 	end;
 	//until Engine.Status = lsOffline;
 	

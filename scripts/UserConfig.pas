@@ -34,6 +34,9 @@ TUserConfig = packed record
 	EquippedWeaponID: integer;
 	PartyMember: string;
 	CurrentHuntingZoneId: integer;
+	ActivityPriorityHunting: integer;
+	ActivityPriorityTrading: integer;
+	ActivityPriorityFishing: integer;
 	// TODO: add an array of available hunting zones for current user 
 end;
 
@@ -65,6 +68,9 @@ begin
 		EquippedWeaponID := -1;
 		PartyMember := '';
 		CurrentHuntingZoneId := 0;
+		ActivityPriorityHunting := 80
+		ActivityPriorityTrading := 20;
+		ActivityPriorityFishing := 0;
 	end;
 	
 	Result := userState;
@@ -91,7 +97,7 @@ begin
 		splittedString.DelimitedText := stringList[i];
 		//DEBUG: 
 		Print(stringlist[i]);
-
+		
 		if (splittedString[0] = 'CHARACTER_CONFIG') then
 		begin
 			with userState do
@@ -100,6 +106,15 @@ begin
 				CurrentHuntingZoneId := StrToInt(splittedString[1]);
 			end;
 		end
+		else if (splittedString[0] = 'ACTIVITY_CONFIG') then
+		begin
+			with userState do
+			begin
+				ActivityPriorityHunting := StrToInt(splittedString[1]);
+				ActivityPriorityTrading := StrToInt(splittedString[2]);
+				ActivityPriorityFishing := StrToInt(splittedString[3]);
+			end;
+		end;
 		else if (splittedString[0] = 'SPOT_CONFIG') then
 		begin
 			// TODO: load special variables for current character

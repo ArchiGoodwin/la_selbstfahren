@@ -1,5 +1,7 @@
 CHARACTER_CONFIG,2,diamondell
 CHARACTER_CONFIG_DEBUG,CurrentHuntZoneId,PartyMember1
+ACTIVITY_CONFIG,80,20,0
+ACTIVITY_CONFIG_DEBUG,ACT_HUNTING,ACT_TRADING,ACT_FISHING:integer_1..100%
 SPOT_CONFIG,25,1200,3,2,4
 SPOT_CONFIG_DEBUG,MaxSecondsOnspot: integer, SpotRange: integer, MaxCountOfFailedSpots: integer,MaxLoopsOnHuntingZone: integer, MaxSecondsNotInCombat: integer 
 SPOT_NAME,0,TOWN_DWARF_VILLAGE,15,HuntingHwel_Mithryl_Path
