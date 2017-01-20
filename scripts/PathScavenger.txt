@@ -1,0 +1,190 @@
+  Engine.MoveTo(115709, -178958, -1006);
+  Engine.MoveTo(116506, -179894, -1179);
+  Engine.MoveTo(116644, -181552, -1454);
+  Engine.MoveTo(116406, -182575, -1546);
+  Engine.MoveTo(116004, -183118, -1515);
+  Engine.MoveTo(115823, -183350, -1505);
+  Engine.MoveTo(115682, -183296, -1505);
+  Engine.SetTarget(30524);   // Пепи
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+Engine.BypassToServer("quest_accept?quest_id=417");
+  Engine.MoveTo(115728, -183279, -1505);
+  Engine.MoveTo(115955, -183260, -1510);
+  Engine.MoveTo(116130, -182177, -1505);
+  Engine.MoveTo(116616, -181289, -1409);
+  Engine.MoveTo(116688, -180356, -1233);
+  Engine.MoveTo(116011, -179216, -1059);
+  Engine.CancelTarget;
+  Engine.MoveTo(115612, -178668, -977);
+  Engine.MoveTo(115760, -178010, -931);
+  Engine.MoveTo(115926, -177802, -920);
+  Engine.MoveTo(116117, -177714, -911);
+  Engine.MoveTo(116242, -177543, -911);
+  Engine.SetTarget(30519);   // Мион
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+Engine.BypassToServer("quest_choice?choice=3&option=1");
+Engine.BypassToServer("menu_select?ask=417&reply=1");
+
+// TODO: one of 3 possible NPC can be selected.
+// Zimenf:
+  Engine.MoveTo(116159, -177680, -911);
+  Engine.MoveTo(116095, -177723, -911);
+  Engine.MoveTo(115878, -177776, -920);
+  Engine.MoveTo(115680, -178261, -961);
+  Engine.MoveTo(115678, -178527, -975);
+  Engine.MoveTo(115134, -178601, -926);
+  Engine.MoveTo(114950, -178572, -871);
+  Engine.MoveTo(114941, -178571, -868);
+  Engine.MoveTo(114619, -178532, -840);
+  Engine.MoveTo(114516, -178545, -840);
+  Engine.SetTarget(30538);   // Зименф
+  Engine.MoveTo(114457, -178623, -840);
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+// end of Zimenf
+
+  Engine.MoveTo(114519, -178604, -840);
+  Engine.MoveTo(114824, -178482, -849);
+  Engine.MoveTo(115704, -177886, -921);
+  Engine.MoveTo(116150, -177696, -911);
+  Engine.MoveTo(116246, -177543, -911);
+  Engine.SetTarget(30519);   // Мион
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+Engine.BypassToServer("quest_choice?choice=6&option=1");
+Engine.BypassToServer("menu_select?ask=417&reply=6");
+
+// 2nd possible NPC: Bronk
+  Engine.MoveTo(116277, -177537, -880);
+  Engine.MoveTo(116217, -177551, -911);
+  Engine.MoveTo(116137, -177693, -911);
+  Engine.MoveTo(116094, -177726, -880);
+  Engine.MoveTo(115890, -177784, -920);
+  Engine.MoveTo(115824, -177844, -920);
+  Engine.MoveTo(115686, -178304, -965);
+  Engine.MoveTo(115613, -178530, -968);
+  Engine.MoveTo(115863, -179144, -1025);
+  Engine.MoveTo(115808, -178975, -1009);
+  Engine.MoveTo(116469, -179876, -1178);
+  Engine.MoveTo(116641, -180329, -1225);
+  Engine.MoveTo(116522, -181663, -1459);
+  Engine.CancelTarget;
+  Engine.MoveTo(115983, -182380, -1499);
+  Engine.MoveTo(115565, -182644, -1474);
+  Engine.MoveTo(115444, -182665, -1468);
+  Engine.MoveTo(115417, -182536, -1468);
+  Engine.MoveTo(115424, -182468, -1468);
+  Engine.SetTarget(30525);   // Бронк
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+// end of bronk
+
+
+  Engine.MoveTo(115399, -182386, -1468);
+  Engine.MoveTo(115450, -182245, -1468);
+  Engine.MoveTo(115611, -182186, -1474);
+  Engine.MoveTo(116414, -181990, -1501);
+  Engine.MoveTo(116671, -181348, -1420);
+  Engine.MoveTo(116773, -180438, -1253);
+  Engine.MoveTo(116007, -179148, -1052);
+  Engine.CancelTarget;
+  Engine.MoveTo(115628, -178633, -976);
+  Engine.MoveTo(115720, -178069, -939);
+  Engine.MoveTo(115921, -177777, -920);
+  Engine.MoveTo(116170, -177697, -911);
+  Engine.MoveTo(116240, -177541, -911);
+  Engine.SetTarget(30519);   // Мион
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+
+// 3rd one. zimenf again
+  Engine.MoveTo(116267, -177449, -880);
+  Engine.MoveTo(116199, -177583, -911);
+  Engine.MoveTo(116135, -177709, -911);
+  Engine.MoveTo(115852, -177767, -920);
+  Engine.MoveTo(115172, -178306, -937);
+  Engine.MoveTo(114985, -178413, -881);
+  Engine.MoveTo(114840, -178496, -851);
+  Engine.MoveTo(114560, -178570, -840);
+  Engine.MoveTo(114461, -178647, -840);
+  Engine.SetTarget(30538);   // Зименф
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+  Engine.MoveTo(114529, -178606, -840);
+  Engine.MoveTo(114760, -178515, -847);
+  Engine.MoveTo(114642, -178546, -808);
+  Engine.MoveTo(114760, -178515, -847);
+  Engine.MoveTo(115432, -178026, -954);
+  Engine.MoveTo(115885, -177803, -920);
+  Engine.MoveTo(116110, -177713, -911);
+  Engine.MoveTo(116218, -177573, -911);
+  Engine.MoveTo(116248, -177546, -911);
+  Engine.SetTarget(30519);   // Мион
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+Engine.BypassToServer("quest_choice?choice=6&option=1");
+Engine.BypassToServer("menu_select?ask=417&reply=6");
+
+// 3rd NPC - Shari
+  Engine.MoveTo(116193, -177580, -911);
+  Engine.MoveTo(116142, -177694, -880);
+  Engine.MoveTo(116118, -177701, -911);
+  Engine.MoveTo(116018, -177746, -888);
+  Engine.MoveTo(115945, -177747, -920);
+  Engine.MoveTo(115879, -177861, -920);
+  Engine.MoveTo(115621, -178473, -968);
+  Engine.MoveTo(115824, -179103, -1018);
+  Engine.MoveTo(116438, -179686, -1155);
+  Engine.MoveTo(116725, -180202, -1220);
+  Engine.MoveTo(116653, -180705, -1304);
+  Engine.MoveTo(116422, -181173, -1380);
+  Engine.CancelTarget;
+  Engine.MoveTo(116272, -181467, -1391);
+  Engine.MoveTo(116192, -181388, -1376);
+  Engine.MoveTo(116181, -181156, -1366);
+  Engine.MoveTo(116166, -181098, -1366);
+  Engine.SetTarget(30517);   // Шари
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+  Engine.MoveTo(116187, -181389, -1376);
+  Engine.MoveTo(116547, -181283, -1402);
+  Engine.MoveTo(116662, -180453, -1250);
+  Engine.MoveTo(116394, -179672, -1152);
+  Engine.MoveTo(115910, -179079, -1029);
+  Engine.MoveTo(115629, -178650, -977);
+  Engine.MoveTo(115686, -178103, -943);
+  Engine.MoveTo(115866, -177844, -920);
+  Engine.CancelTarget;
+  Engine.MoveTo(115965, -177750, -920);
+  Engine.MoveTo(116116, -177741, -911);
+  Engine.MoveTo(116194, -177624, -911);
+  Engine.MoveTo(116245, -177541, -911);
+//end of shari
+
+  Engine.SetTarget(30519);   // Мион
+  Engine.DlgOpen;
+  // тут записываем диалог
+  // Engine.DlgSel(1);
+Engine.BypassToServer("talk_select");
+Engine.BypassToServer("quest_choice?choice=7&option=1");
+// finally - retrieved Mion Letter. id=1646
+// TODO: find Toma.
+
